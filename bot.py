@@ -35,11 +35,12 @@ class CloseButton(nextcord.ui.View):
 
 
 async def readConfig():
-    with open("config.json", "r", encoding="utf8") as jsonfile:
-        config = json.loads(jsonfile.read())
-        console.log("Config loaded [green]successfully[/green].")
-        print(config)
-        return config
+    async with aiofiles.open("config.json", mode="r", encoding="utf8") as jsonfile:
+        contents = await jsonfile.read()
+    config = json.loads(contents)
+    console.log("Config loaded [green]successfully[/green].")
+    print(config)
+    return config
 
 
 # On ready, do this.
@@ -86,15 +87,16 @@ async def ping(ctx):
 
 
 async def write_list(a_list):
-    with open("users.json", "w") as f:
-        json.dump(a_list, f)
+    async with aiofiles.open("users.json", "w") as f:
+        await f.write(json.dumps(a_list))
         print("Done writing JSON data into .json file")
 
 
 async def read_list():
     # for reading also binary mode is important
-    with open("users.json", "r") as fp:
-        n_list = json.load(fp)
+    async with aiofiles.open("users.json", "r") as fp:
+        n_list = json.loads(await fp.read())
+        print(n_list)
     return n_list
 
 
