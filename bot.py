@@ -136,7 +136,7 @@ async def register_score(ctx, mode: str, time: int):
     writing_template = {user_id: {"AnyPercent": time}}
     print(loaded_file)
     loaded_file.update(writing_template)
-    await write_dictionary(loaded_file, 'times.json')
+    await write_to_file(loaded_file, 'times.json')
 
 
 bot.run(os.getenv("TOKEN"))
