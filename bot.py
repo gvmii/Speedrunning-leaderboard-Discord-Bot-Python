@@ -119,9 +119,9 @@ async def submit_time(ctx, mode: str, time: str):
     loaded_file = await read_dict('times.json')
 
     # TODO: Fix this jank thing
-    validated_time = await validate_time(time)
+    delta = await validate_time(time)
     try:
-        formatted_time = str(validated_time)
+        formatted_time = str(delta.total_seconds())
     except AttributeError:
         await ctx.send('Please write your time in the following format: H:M:S:ms')
 
@@ -140,15 +140,30 @@ async def personal_best(ctx, mode: str, user: discord.Member = None):
     user = user or ctx.author
 
     if user.id in loaded_file:
-        pb = loaded_file[user_id].get(mode)
-        await ctx.send(f"{user.mention}'s {mode} time is {pb}")
+        pb = float(loaded_file[user_id].get(mode))
+        await ctx.send(f"{user.mention}'s {mode} time is {str(timedelta(seconds=pb))}")
+
 
 @bot.command()
 async def leaderboard(ctx, mode):
     loaded_file = await read_dict('times.json')
-    for user_id, times in loaded_file.items():
-        print(times["any%"])
-        print(user_id)
+    dict_to_sort = {}
+
+    for user_id, time in loaded_file.items():
+        dict_to_sort.update({user_id: float(time[mode])})
+
+    sorted_obj = dict(sorted(dict_to_sort.items(), key=lambda i: i[1]))
+
+    embed = discord.Embed(title='Leaderboard')
+    for userid, time in sorted_obj.items():
+        # int_user_id = int(userid)
+        # print(int_user_id)
+        # user = await nextcord.Client.fetch_user(int_user_id)
+        embed.add_field(name=userid, value=time)
+
+    await ctx.send(embed=embed)
+
+
 
 
 bot.run(os.getenv("TOKEN"))
