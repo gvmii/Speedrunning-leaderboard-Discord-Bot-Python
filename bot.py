@@ -1,7 +1,7 @@
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 import aiofiles
 import discord
 import nextcord
@@ -82,10 +82,11 @@ async def validate_time(time):
     # This might be slow because try excepts are slow in Python, but whatever.
     # TODO: Make this a bit more efficient
     try:
-        validated_time = datetime.strptime(time, '%H:%M:%S.%f').time()
+        t = datetime.strptime(time, '%H:%M:%S.%f').time()
+        delta = timedelta(hours=t.hour, minutes=t.minute, seconds=t.second, microseconds=t.microsecond)
     except ValueError:
         return ValueError
-    return validated_time
+    return delta
 
 
 @bot.command()
@@ -113,14 +114,14 @@ async def favorite_song(ctx, song):
 
 
 @bot.command()
-async def register_score(ctx, mode: str, time: str):
+async def submit_time(ctx, mode: str, time: str):
     user_id = ctx.author.id
     loaded_file = await read_dict('times.json')
 
     # TODO: Fix this jank thing
     validated_time = await validate_time(time)
     try:
-        formatted_time = validated_time.strftime('%H:%M:%S.%f')
+        formatted_time = str(validated_time)
     except AttributeError:
         await ctx.send('Please write your time in the following format: H:M:S:ms')
 
@@ -141,6 +142,13 @@ async def personal_best(ctx, mode: str, user: discord.Member = None):
     if user.id in loaded_file:
         pb = loaded_file[user_id].get(mode)
         await ctx.send(f"{user.mention}'s {mode} time is {pb}")
+
+@bot.command()
+async def leaderboard(ctx, mode):
+    loaded_file = await read_dict('times.json')
+    for user_id, times in loaded_file.items():
+        print(times["any%"])
+        print(user_id)
 
 
 bot.run(os.getenv("TOKEN"))
