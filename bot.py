@@ -1,15 +1,13 @@
-import asyncio
 import json
 import os
 import sys
-
+from datetime import datetime
 import aiofiles
 import discord
 import nextcord
 from dotenv import load_dotenv
 from nextcord.ext import commands
 from rich import print, console
-from datetime import datetime
 
 intents = nextcord.Intents.default()
 intents.message_content = True
@@ -84,9 +82,10 @@ async def validate_time(time):
     # This might be slow because try excepts are slow in Python, but whatever.
     # TODO: Make this a bit more efficient
     try:
-        datetime.strptime(time, '%H:%M:%S.%f')
+        validated_time = datetime.strptime(time, '%H:%M:%S.%f').time()
     except ValueError:
-        print('invalid time')
+        return ValueError
+    return validated_time
 
 
 @bot.command()
@@ -117,10 +116,19 @@ async def favorite_song(ctx, song):
 async def register_score(ctx, mode: str, time: str):
     user_id = ctx.author.id
     loaded_file = await read_dict('times.json')
-    writing_template = {user_id: {mode: time}}
-    print(loaded_file)
-    loaded_file.update(writing_template)
-    await write_to_file(loaded_file, 'times.json')
+
+    # TODO: Fix this jank thing
+    validated_time = await validate_time(time)
+    try:
+        formatted_time = validated_time.strftime('%H:%M:%S.%f')
+    except AttributeError:
+        await ctx.send('Please write your time in the following format: H:M:S:ms')
+
+    else:
+        writing_template = {user_id: {mode: formatted_time}}
+        print(loaded_file)
+        loaded_file.update(writing_template)
+        await write_to_file(loaded_file, 'times.json')
 
 
 @bot.command()
