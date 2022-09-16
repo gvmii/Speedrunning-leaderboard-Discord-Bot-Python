@@ -107,22 +107,19 @@ async def validate_category(category):
 
 @bot.command()
 async def register(ctx):
-    existing_users = await read_list('users.json')
     user_id = ctx.author.id
-    if user_id not in existing_users:
-        existing_users.append(user_id)
-        await write_to_file(existing_users, 'users.json')
-        await ctx.send('Registered successfully')
-    else:
-        await ctx.send("You're already registered")
+    loaded_file = await read_dict('times.json')
+    writing_template = {
+        user_id: {'any%': {'time': '', 'state': ''}, 'arb': {'time': '',
+                                                             'state': ''}}}
+    loaded_file.update(writing_template)
+    await write_to_file(loaded_file, 'times.json')
 
 
 @bot.command()
 async def favorite_song(ctx, song):
     loaded_users = await read_list('user_songs.json')
     user_id = ctx.author.id
-    # if user_id in loaded_users:
-
     song_to_write = {user_id: song}
     loaded_users.update(song_to_write)
     print(loaded_users)
@@ -130,12 +127,12 @@ async def favorite_song(ctx, song):
 
 
 @bot.command()
-async def submit_time(ctx, mode: str, time: str):
+async def submit_time(ctx, category: str, time: str):
     user_id = ctx.author.id
     loaded_file = await read_dict('times.json')
-    if await validate_category(mode) is False:
+    if await validate_category(category) is False:
         global VALID_CATEGORIES
-        await ctx.send('Please write a valid category. Valid categories are'
+        await ctx.send('Please write a valid category. Valid categories are '
                        + str(VALID_CATEGORIES))
         return
     # TODO: Fix this jank thing
@@ -148,14 +145,18 @@ async def submit_time(ctx, mode: str, time: str):
         return
 
     else:
-        writing_template = {
-            user_id: {mode: formatted_time}}
-        loaded_file.update(writing_template)
-        await write_to_file(loaded_file, 'times.json')
-        await ctx.send(
-            f'Successfully submitted time of **{str(delta)}** for the '
-            f'category **{mode}** For the user {ctx.author} with ID '
-            f'{user_id} at {datetime.now()}')
+        if user_id in loaded_file:
+            loaded_file[user_id][category]["time"] = formatted_time
+            loaded_file[user_id][category]["state"] = 'PENDING'
+
+            await write_to_file(loaded_file, 'times.json')
+            await ctx.send(
+                f'Successfully submitted time of **{str(delta)}** for the '
+                f'category **{category}** For the user {ctx.author} with ID '
+                f'{user_id} at {datetime.now()}')
+        else:
+            await ctx.send('registrate')
+            return
 
 
 @bot.command()
@@ -178,7 +179,8 @@ async def leaderboard(ctx, category):
     dict_to_sort = {}
 
     for user_id, time in loaded_file.items():
-        dict_to_sort.update({user_id: float(time[category])})
+        print(time[category])
+        dict_to_sort.update({user_id: float(time[category]['time'])})
 
     sorted_obj = dict(sorted(dict_to_sort.items(), key=lambda i: i[1]))
 
