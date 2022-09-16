@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from datetime import datetime, timedelta
+
 import aiofiles
 import discord
 import nextcord
@@ -23,7 +24,8 @@ load_dotenv()
 
 
 async def read_config():
-    async with aiofiles.open("config.json", mode="r", encoding="utf8") as jsonfile:
+    async with aiofiles.open("config.json", mode="r",
+                             encoding="utf8") as jsonfile:
         contents = await jsonfile.read()
     config = json.loads(contents)
     console.log("Config loaded [green]successfully[/green].")
@@ -46,12 +48,13 @@ async def on_ready():
 
     print(f"Logged in as {bot.user}.")
     channel = bot.get_channel(channel_id)
-    console.log(f"Channel #{channel.name} ({channel.id}) [green]found[/green].")
+    console.log(
+        f"Channel #{channel.name} ({channel.id}) [green]found[/green].")
 
 
-# @bot.event
-# async def on_command_error(ctx, error):
-#     console.log(f"[red]Error[/red]: {str(error)}")
+@bot.event
+async def on_command_error(ctx, error):
+    console.log(f"[red]Error[/red]: {str(error)}")
 
 
 @bot.command()
@@ -78,15 +81,28 @@ async def read_list(file):
     return loaded_list
 
 
-async def validate_time(time):
+async def deltify_time(time):
     # This might be slow because try excepts are slow in Python, but whatever.
     # TODO: Make this a bit more efficient
     try:
         t = datetime.strptime(time, '%H:%M:%S.%f').time()
-        delta = timedelta(hours=t.hour, minutes=t.minute, seconds=t.second, microseconds=t.microsecond)
+        delta = timedelta(hours=t.hour, minutes=t.minute, seconds=t.second,
+                          microseconds=t.microsecond)
     except ValueError:
         return ValueError
     return delta
+
+
+VALID_CATEGORIES = ['ANY%', 'ARB', 'SL']
+
+
+async def validate_category(category):
+    global VALID_CATEGORIES
+    c = category.upper()
+    if c in VALID_CATEGORIES:
+        return True
+    else:
+        return False
 
 
 @bot.command()
@@ -117,53 +133,66 @@ async def favorite_song(ctx, song):
 async def submit_time(ctx, mode: str, time: str):
     user_id = ctx.author.id
     loaded_file = await read_dict('times.json')
-
+    if await validate_category(mode) is False:
+        global VALID_CATEGORIES
+        await ctx.send('Please write a valid category. Valid categories are'
+                       + str(VALID_CATEGORIES))
+        return
     # TODO: Fix this jank thing
-    delta = await validate_time(time)
+    delta = await deltify_time(time)
     try:
         formatted_time = str(delta.total_seconds())
     except AttributeError:
-        await ctx.send('Please write your time in the following format: H:M:S:ms')
+        await ctx.send(
+            'Please write your time in the following format: H:M:S.ms')
+        return
 
     else:
-        writing_template = {user_id: {mode: formatted_time}}
-        print(loaded_file)
+        writing_template = {
+            user_id: {mode: formatted_time}}
         loaded_file.update(writing_template)
         await write_to_file(loaded_file, 'times.json')
+        await ctx.send(
+            f'Successfully submitted time of **{str(delta)}** for the '
+            f'category **{mode}** For the user {ctx.author} with ID '
+            f'{user_id} at {datetime.now()}')
 
 
 @bot.command()
-async def personal_best(ctx, mode: str, user: discord.Member = None):
+async def personal_best(ctx, category: str = 'Any%',
+                        user: discord.Member = None):
     user_id = ctx.author.id
     loaded_file = await read_dict('times.json')
 
     user = user or ctx.author
 
     if user.id in loaded_file:
-        pb = float(loaded_file[user_id].get(mode))
-        await ctx.send(f"{user.mention}'s {mode} time is {str(timedelta(seconds=pb))}")
+        pb = float(loaded_file[user_id].get(category))
+        await ctx.send(
+            f"{user.mention}'s {category} time is {str(timedelta(seconds=pb))}")
 
 
 @bot.command()
-async def leaderboard(ctx, mode):
+async def leaderboard(ctx, category):
     loaded_file = await read_dict('times.json')
     dict_to_sort = {}
 
     for user_id, time in loaded_file.items():
-        dict_to_sort.update({user_id: float(time[mode])})
+        dict_to_sort.update({user_id: float(time[category])})
 
     sorted_obj = dict(sorted(dict_to_sort.items(), key=lambda i: i[1]))
 
     embed = discord.Embed(title='Leaderboard')
+    print(sorted_obj.items())
+    number = 1
     for userid, time in sorted_obj.items():
-        # int_user_id = int(userid)
-        # print(int_user_id)
-        # user = await nextcord.Client.fetch_user(int_user_id)
-        embed.add_field(name=userid, value=time)
+        user = await bot.fetch_user(int(userid))
+        embed.add_field(name=f'{number} - {user.name}',
+                        value=str(timedelta(seconds=time)).replace('0000', ''),
+                        inline=False)
+        number += 1
 
     await ctx.send(embed=embed)
-
-
 
 
 bot.run(os.getenv("TOKEN"))
