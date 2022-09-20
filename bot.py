@@ -4,7 +4,6 @@ import sys
 from datetime import datetime, timedelta
 
 import aiofiles
-import discord
 import nextcord
 from dotenv import load_dotenv
 from nextcord.ext import commands
@@ -24,8 +23,9 @@ load_dotenv()
 
 
 async def read_config():
-    async with aiofiles.open("config.json", mode="r",
-                             encoding="utf8") as jsonfile:
+    async with aiofiles.open(
+        "config.json", mode="r", encoding="utf8"
+    ) as jsonfile:
         contents = await jsonfile.read()
     config = json.loads(contents)
     console.log("Config loaded [green]successfully[/green].")
@@ -49,7 +49,8 @@ async def on_ready():
     print(f"Logged in as {bot.user}.")
     channel = bot.get_channel(channel_id)
     console.log(
-        f"Channel #{channel.name} ({channel.id}) [green]found[/green].")
+        f"Channel #{channel.name} ({channel.id}) [green]found[/green]."
+    )
 
 
 @bot.event
@@ -85,15 +86,19 @@ async def deltify_time(time):
     # This might be slow because try excepts are slow in Python, but whatever.
     # TODO: Make this a bit more efficient
     try:
-        t = datetime.strptime(time, '%H:%M:%S.%f').time()
-        delta = timedelta(hours=t.hour, minutes=t.minute, seconds=t.second,
-                          microseconds=t.microsecond)
+        t = datetime.strptime(time, "%H:%M:%S.%f").time()
+        delta = timedelta(
+            hours=t.hour,
+            minutes=t.minute,
+            seconds=t.second,
+            microseconds=t.microsecond,
+        )
     except ValueError:
         return ValueError
     return delta
 
 
-VALID_CATEGORIES = ['ANY%', 'ARB', 'SL']
+VALID_CATEGORIES = ["ANY%", "ARB", "SL"]
 
 
 async def validate_category(category):
@@ -108,32 +113,37 @@ async def validate_category(category):
 @bot.command()
 async def register(ctx):
     user_id = ctx.author.id
-    loaded_file = await read_dict('times.json')
+    loaded_file = await read_dict("times.json")
     writing_template = {
-        user_id: {'any%': {'time': '', 'state': ''}, 'arb': {'time': '',
-                                                             'state': ''}}}
+        user_id: {
+            "any%": {"time": "", "state": ""},
+            "arb": {"time": "", "state": ""},
+        }
+    }
     loaded_file.update(writing_template)
-    await write_to_file(loaded_file, 'times.json')
+    await write_to_file(loaded_file, "times.json")
 
 
 @bot.command()
 async def favorite_song(ctx, song):
-    loaded_users = await read_list('user_songs.json')
+    loaded_users = await read_list("user_songs.json")
     user_id = ctx.author.id
     song_to_write = {user_id: song}
     loaded_users.update(song_to_write)
     print(loaded_users)
-    await write_to_file(loaded_users, 'user_songs.json')
+    await write_to_file(loaded_users, "user_songs.json")
 
 
 @bot.command()
 async def submit_time(ctx, category: str, time: str):
     user_id = ctx.author.id
-    loaded_file = await read_dict('times.json')
+    loaded_file = await read_dict("times.json")
     if await validate_category(category) is False:
         global VALID_CATEGORIES
-        await ctx.send('Please write a valid category. Valid categories are '
-                       + str(VALID_CATEGORIES))
+        await ctx.send(
+            "Please write a valid category. Valid categories are "
+            + str(VALID_CATEGORIES)
+        )
         return
     # TODO: Fix this jank thing
     delta = await deltify_time(time)
@@ -141,57 +151,63 @@ async def submit_time(ctx, category: str, time: str):
         formatted_time = str(delta.total_seconds())
     except AttributeError:
         await ctx.send(
-            'Please write your time in the following format: H:M:S.ms')
+            "Please write your time in the following format: H:M:S.ms"
+        )
         return
 
     else:
         if user_id in loaded_file:
             loaded_file[user_id][category]["time"] = formatted_time
-            loaded_file[user_id][category]["state"] = 'PENDING'
+            loaded_file[user_id][category]["state"] = "PENDING"
 
-            await write_to_file(loaded_file, 'times.json')
+            await write_to_file(loaded_file, "times.json")
             await ctx.send(
-                f'Successfully submitted time of **{str(delta)}** for the '
-                f'category **{category}** For the user {ctx.author} with ID '
-                f'{user_id} at {datetime.now()}')
+                f"Successfully submitted time of **{str(delta)}** for the "
+                f"category **{category}** For the user {ctx.author} with ID "
+                f"{user_id} at {datetime.now()}"
+            )
         else:
-            await ctx.send('registrate')
+            await ctx.send("registrate")
             return
 
 
 @bot.command()
-async def personal_best(ctx, category: str = 'Any%',
-                        user: discord.Member = None):
+async def personal_best(
+    ctx, category: str = "Any%", user: nextcord.Member = None
+):
     user_id = ctx.author.id
-    loaded_file = await read_dict('times.json')
+    loaded_file = await read_dict("times.json")
 
     user = user or ctx.author
 
     if user.id in loaded_file:
         pb = float(loaded_file[user_id].get(category))
         await ctx.send(
-            f"{user.mention}'s {category} time is {str(timedelta(seconds=pb))}")
+            f"{user.mention}'s {category} time is {str(timedelta(seconds=pb))}"
+        )
 
 
 @bot.command()
 async def leaderboard(ctx, category):
-    loaded_file = await read_dict('times.json')
+    loaded_file = await read_dict("times.json")
     dict_to_sort = {}
 
     for user_id, time in loaded_file.items():
         print(time[category])
-        dict_to_sort.update({user_id: float(time[category]['time'])})
+        dict_to_sort.update({user_id: float(time[category]["time"])})
 
     sorted_obj = dict(sorted(dict_to_sort.items(), key=lambda i: i[1]))
 
-    embed = discord.Embed(title='Leaderboard')
+    embed = nextcord.Embed(title="Leaderboard")
     print(sorted_obj.items())
     number = 1
     for userid, time in sorted_obj.items():
         user = await bot.fetch_user(int(userid))
-        embed.add_field(name=f'{number} - {user.name}',
-                        value=str(timedelta(seconds=time)).replace('0000', ''),
-                        inline=False)
+        embed.add_field(
+            name=f"{number} - {user.name}",
+            value=str(timedelta(seconds=time)).replace("0000", ""),
+            inline=False,
+        )
         number += 1
 
     await ctx.send(embed=embed)
