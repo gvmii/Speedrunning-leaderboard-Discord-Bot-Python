@@ -4,11 +4,22 @@
 
 ## Warning: This project is a W.I.P. Please report any issues on the Issues tab.
 
+### License
 
+**Speedrunning-leaderboard-Discord-Bot-Python © 2022 by Iwakura Megumi is licensed under CC BY-NC 4.0. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/4.0/**
 ### Setup
 
 ```bash
+$ git clone https://github.com/gvmii/Speedrunning-leaderboard-Discord-Bot-Python.git
+$ cd Speedrunning-leaderboard-Discord-Bot-Python
 $ pip install -r requirements.txt
+```
+Create a .env file and add the following:
+`TOKEN='YOUR_TOKEN_HERE'` replacing `YOUR_TOKEN_HERE` with your Discord Bot Token
+
+After that, run the following:
+
+```bash 
 $ python ./bot.py
 ```
 ### Style guidelines

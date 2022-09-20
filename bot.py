@@ -1,3 +1,8 @@
+# Speedrunning-leaderboard-Discord-Bot-Python © 2022 by Iwakura Megumi is
+# licensed under CC BY-NC 4.0. To view a copy of this license, visit
+# http://creativecommons.org/licenses/by-nc/4.0/
+
+
 import json
 import os
 import sys
