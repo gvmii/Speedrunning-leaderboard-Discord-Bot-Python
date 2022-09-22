@@ -9,6 +9,7 @@ import sys
 from datetime import datetime, timedelta
 
 import aiofiles
+import aiohttp
 import nextcord
 from dotenv import load_dotenv
 from nextcord.ext import commands
@@ -163,7 +164,7 @@ async def submit_time(ctx, category: str, time: str):
     else:
         if user_id in loaded_file:
             loaded_file[user_id][category]["time"] = formatted_time
-            loaded_file[user_id][category]["state"] = "PENDING"
+            loaded_file[user_id][category]["state"] = "NEW"
 
             await write_to_file(loaded_file, "times.json")
             await ctx.send(
@@ -216,6 +217,18 @@ async def leaderboard(ctx, category):
         number += 1
 
     await ctx.send(embed=embed)
+
+# Phew, this is harder than I initially expected...
+# @bot.command()
+# async def best_times(ctx):
+#     async with aiohttp.ClientSession() as session:
+#         async with session.get(
+#             "https://www.speedrun.com/api/v1/runs",
+#             params={"game": "Celeste", "category": "any%"},
+#         ) as r:
+#             print(await r.json())
+#             for i in r.json:
+#                 print(i)
 
 
 bot.run(os.getenv("TOKEN"))
