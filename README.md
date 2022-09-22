@@ -33,6 +33,7 @@ Please first contribute to the project by fixing things tagged in the code with 
 - Add a medals system, where you can give them to members for certain achievements
 - Get data from speedrun.com
 - Separate commands/utilities by cogs
+- Write unittests
 ### Style guidelines
 
 - All code should be formatted with [Black](https://black.readthedocs.io/en/stable/index.html)
