@@ -31,7 +31,8 @@ Please first contribute to the project by fixing things tagged in the code with 
 - Move to another data file method (Database, or .csv)
 - Add an installation setup.py for first startup (create .env file, set channel ID, etc)
 - Add a medals system, where you can give them to members for certain achievements
-
+- Get data from speedrun.com
+- Separate commands/utilities by cogs
 ### Style guidelines
 
 - All code should be formatted with [Black](https://black.readthedocs.io/en/stable/index.html)
