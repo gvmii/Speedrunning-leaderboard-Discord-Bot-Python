@@ -17,10 +17,15 @@ def setup():
     data = {}
 
     create_config()
-    data["channel_id"] = input("What channel id would you like to use?")
+    data["channel_id"] = input("What channel id would you like to use? ")
 
     with open('data/config.json','w') as f:
         f.write(json.dumps(data))
+
+    if not os.path.exists('.env'):
+        token = input("What bot token would you like to use? ")
+        with open('.env','w') as env:
+            env.write(f'TOKEN="{token}"')
 
 
 if __name__ == '__main__':
