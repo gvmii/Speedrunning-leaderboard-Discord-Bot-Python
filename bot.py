@@ -30,7 +30,7 @@ load_dotenv()
 
 
 async def read_config():
-    #tries to open config.json, if it fails it creates it (i will make this actually work nice later, just for now it's kinda cringe)
+    #tries to open config.json, if it fails it will return false and prompt the user to run setup.py
     try:
         async with aiofiles.open(
             "data/config.json", mode="r", encoding="utf8"
@@ -50,7 +50,7 @@ async def read_config():
 @bot.event
 async def on_ready():
     config = await read_config()
-
+    #if config is not False do stuff, otherwise quit & tell user to run setup.py
     if config:
         if not config["channel_id"]:
             config = await read_config()
