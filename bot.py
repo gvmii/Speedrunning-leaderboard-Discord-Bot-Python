@@ -8,6 +8,7 @@ import os
 import sys
 from datetime import datetime, timedelta
 
+import sqlite3
 import aiofiles
 import aiohttp
 import nextcord
@@ -29,10 +30,23 @@ load_dotenv()
 
 
 async def read_config():
-    async with aiofiles.open(
-        "config.json", mode="r", encoding="utf8"
-    ) as jsonfile:
-        contents = await jsonfile.read()
+    #tries to open config.json, if it fails it creates it (i will make this actually work nice later, just for now it's kinda cringe)
+    try:
+        async with aiofiles.open(
+            "config.json", mode="r", encoding="utf8"
+        ) as jsonfile:
+            contents = await jsonfile.read()
+    except FileNotFoundError:
+        async with aiofiles.open(
+            "config.json", mode="w", encoding="utf8"
+        ) as f:
+            await f.write('{"channel_id": "CHANGEME"}')
+    #reads the config
+        async with aiofiles.open(
+            "config.json", mode="r", encoding="utf8"
+        ) as jsonfile:
+            contents = await jsonfile.read()
+
     config = json.loads(contents)
     console.log("Config loaded [green]successfully[/green].")
     print(config)
@@ -64,7 +78,7 @@ async def on_command_error(ctx, error):
     console.log(f"[red]Error[/red]: {str(error)}")
 
 
-@bot.command()
+@bot.slash_command()
 async def ping(ctx):
     await ctx.send("pong")
 
@@ -115,8 +129,22 @@ async def validate_category(category):
     else:
         return False
 
+#command to change the channel id. not too neccessary and will probably remove later
+@bot.slash_command()
+@commands.has_permissions(administrator=True)
+async def setchannelid(ctx, channel_id):
+    async with aiofiles.open("config.json", mode="r", encoding="utf8") as f:
+        contents = await f.read()
+        thing = json.loads(contents)
 
-@bot.command()
+    thing["channel_id"] = channel_id
+
+    await write_to_file(thing, "config.json")
+
+    embed = nextcord.Embed(title="Success",description=f"Successfully changed the Channel ID to '{channel_id}'",color=nextcord.Color.blurple())
+    await ctx.send(embed=embed)
+
+@bot.slash_command()
 async def register(ctx):
     user_id = ctx.author.id
     loaded_file = await read_dict("times.json")
@@ -130,7 +158,7 @@ async def register(ctx):
     await write_to_file(loaded_file, "times.json")
 
 
-@bot.command()
+@bot.slash_command()
 async def favorite_song(ctx, song):
     loaded_users = await read_list("user_songs.json")
     user_id = ctx.author.id
@@ -140,7 +168,7 @@ async def favorite_song(ctx, song):
     await write_to_file(loaded_users, "user_songs.json")
 
 
-@bot.command()
+@bot.slash_command()
 async def submit_time(ctx, category: str, time: str):
     user_id = ctx.author.id
     loaded_file = await read_dict("times.json")
@@ -177,7 +205,7 @@ async def submit_time(ctx, category: str, time: str):
             return
 
 
-@bot.command()
+@bot.slash_command()
 async def personal_best(
     ctx, category: str = "Any%", user: nextcord.Member = None
 ):
@@ -193,7 +221,7 @@ async def personal_best(
         )
 
 
-@bot.command()
+@bot.slash_command()
 async def leaderboard(ctx, category):
     loaded_file = await read_dict("times.json")
     dict_to_sort = {}
