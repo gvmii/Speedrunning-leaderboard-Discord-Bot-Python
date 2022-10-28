@@ -33,19 +33,12 @@ async def read_config():
     #tries to open config.json, if it fails it creates it (i will make this actually work nice later, just for now it's kinda cringe)
     try:
         async with aiofiles.open(
-            "config.json", mode="r", encoding="utf8"
+            "data/config.json", mode="r", encoding="utf8"
         ) as jsonfile:
             contents = await jsonfile.read()
     except FileNotFoundError:
-        async with aiofiles.open(
-            "config.json", mode="w", encoding="utf8"
-        ) as f:
-            await f.write('{"channel_id": "CHANGEME"}')
-    #reads the config
-        async with aiofiles.open(
-            "config.json", mode="r", encoding="utf8"
-        ) as jsonfile:
-            contents = await jsonfile.read()
+        print(f'[red]config file not found. try running setup.py[/red]')
+        return False
 
     config = json.loads(contents)
     console.log("Config loaded [green]successfully[/green].")
@@ -57,20 +50,24 @@ async def read_config():
 @bot.event
 async def on_ready():
     config = await read_config()
-    if not config["channel_id"]:
-        config = await read_config()
-    try:
-        channel_id = int(config["channel_id"])
-        console.log(f"Channel ID Set to: {channel_id}.")
-    except Exception as e:
-        console.log(f"[red]Error[/red]: Couldn't read channel id: {e}")
-        sys.exit(1)
 
-    print(f"Logged in as {bot.user}.")
-    channel = bot.get_channel(channel_id)
-    console.log(
-        f"Channel #{channel.name} ({channel.id}) [green]found[/green]."
-    )
+    if config:
+        if not config["channel_id"]:
+            config = await read_config()
+        try:
+            channel_id = int(config["channel_id"])
+            console.log(f"Channel ID Set to: {channel_id}.")
+        except Exception as e:
+            console.log(f"[red]Error[/red]: Couldn't read channel id: {e}")
+            sys.exit(1)
+
+        print(f"Logged in as {bot.user}.")
+        channel = bot.get_channel(channel_id)
+        console.log(
+            f"Channel #{channel.name} ({channel.id}) [green]found[/green]."
+        )
+    else:
+        exit()
 
 
 @bot.event
@@ -207,7 +204,7 @@ async def submit_time(ctx, category: str, time: str):
 
 @bot.slash_command()
 async def personal_best(
-    ctx, category: str = "Any%", user: nextcord.Member = None
+        ctx, category: str = "Any%", user: nextcord.Member = None
 ):
     user_id = ctx.author.id
     loaded_file = await read_dict("times.json")

@@ -1,7 +1,7 @@
 import os
 import json
 
-#none of this works yet :3
+#creates config.json in the data directory
 
 def create_config():
     print("file not found")
@@ -11,25 +11,18 @@ def create_config():
         print("impost")
 
 def setup():
-
     if not os.path.exists('data'):
         os.makedirs('data')
 
-    try:
-        with open('data/config.json','r') as f:
-            print("Config file already exists.")
-    except FileNotFoundError:
-        create_config()
-        ChannelID = input("What channel ID would you like to use? ")
+    data = {}
 
-        with open('data/config.json','w') as f:
-            f = f.read()
-            print(f)
-            f = json.load(f)
-            print(f)
-            f['channel_id'] = ChannelID
-            f.write(json.dumps(f))
+    create_config()
+    data["channel_id"] = input("What channel id would you like to use?")
+
+    with open('data/config.json','w') as f:
+        f.write(json.dumps(data))
 
 
 if __name__ == '__main__':
     setup()
+    
