@@ -16,6 +16,8 @@ from dotenv import load_dotenv
 from nextcord.ext import commands
 from rich import print, console
 
+import srcomapi, srcompai.datatypes as dt
+
 intents = nextcord.Intents.default()
 intents.message_content = True
 
@@ -242,6 +244,10 @@ async def leaderboard(ctx, category):
         number += 1
 
     await ctx.send(embed=embed)
+
+
+api = srcomapi.SpeedrumCom();
+
 
 # Phew, this is harder than I initially expected...
 # @bot.command()
