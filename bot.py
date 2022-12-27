@@ -7,16 +7,12 @@ import json
 import os
 import sys
 from datetime import datetime, timedelta
-
-import sqlite3
 import aiofiles
-import aiohttp
 import nextcord
+import srcomapi, srcomapi.datatypes as dt
 from dotenv import load_dotenv
 from nextcord.ext import commands
 from rich import print, console
-
-import srcomapi, srcompai.datatypes as dt
 
 intents = nextcord.Intents.default()
 intents.message_content = True
@@ -72,9 +68,9 @@ async def on_ready():
         exit()
 
 
-@bot.event
-async def on_command_error(ctx, error):
-    console.log(f"[red]Error[/red]: {str(error)}")
+#@bot.event
+#async def on_command_error(ctx, error):
+#    console.log(f"[red]Error[/red]: {str(error)}")
 
 
 @bot.slash_command()
@@ -245,8 +241,23 @@ async def leaderboard(ctx, category):
 
     await ctx.send(embed=embed)
 
+@bot.command()
+async def best_times(ctx):
+    api = srcomapi.SpeedrunCom()
+    game = api.search(srcomapi.datatypes.Game, {"name": "Celeste"})[0]
+    record = game.categories[3].records[0].runs[0]["run"]
+    time = (record.times["primary_t"])
+    delta = str(timedelta(seconds=time))
+    print(delta)
 
-api = srcomapi.SpeedrumCom();
+    embed = nextcord.Embed(title="Best Times", color=nextcord.Color.blurple())
+    embed.add_field(
+        name=f"Best time for {game.categories[3]}",
+        value=f'Any%: {delta.replace("0000", "")}',
+    )
+    await ctx.send(embed=embed)
+
+
 
 
 # Phew, this is harder than I initially expected...
