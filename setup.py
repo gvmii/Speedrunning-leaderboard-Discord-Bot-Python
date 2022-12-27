@@ -4,11 +4,9 @@ import json
 #creates config.json in the data directory
 
 def create_config():
-    print("file not found")
+    print("config.json not found. Creating it now")
     with open('data/config.json','w') as f:
-        print("the")
         f.write('{}')
-        print("impost")
 
 def setup():
     if not os.path.exists('data'):
@@ -26,6 +24,9 @@ def setup():
         token = input("What bot token would you like to use? ")
         with open('.env','w') as env:
             env.write(f'TOKEN="{token}"')
+
+    input("Setup finished. Press enter to exit.")
+    exit()
 
 
 if __name__ == '__main__':
