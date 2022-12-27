@@ -12,7 +12,7 @@
 ```bash
 $ git clone https://github.com/gvmii/Speedrunning-leaderboard-Discord-Bot-Python.git
 $ cd Speedrunning-leaderboard-Discord-Bot-Python
-$ pip install -r requirements.txt
+$ ./venv/Scripts/activate
 ```
 Create a .env file and add the following:
 `TOKEN='YOUR_TOKEN_HERE'` replacing `YOUR_TOKEN_HERE` with your Discord Bot Token

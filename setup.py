@@ -1,5 +1,11 @@
 import os
 import json
+import subprocess
+
+def install_requirements():
+    print("Installing requirements")
+    os.system("pip install -r requirements.txt")
+
 
 #creates config.json in the data directory
 
@@ -9,6 +15,8 @@ def create_config():
         f.write('{}')
 
 def setup():
+    install_requirements()
+
     if not os.path.exists('data'):
         os.makedirs('data')
 
