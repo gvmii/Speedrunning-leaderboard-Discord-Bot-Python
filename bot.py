@@ -28,10 +28,10 @@ load_dotenv()
 
 
 async def read_config():
-    #tries to open config.json, if it fails it will return false and prompt the user to run setup.py
+    # tries to open config.json, if it fails it will return false and prompt the user to run setup.py
     try:
         async with aiofiles.open(
-            "data/config.json", mode="r", encoding="utf8"
+                "data/config.json", mode="r", encoding="utf8"
         ) as jsonfile:
             contents = await jsonfile.read()
     except FileNotFoundError:
@@ -48,7 +48,7 @@ async def read_config():
 @bot.event
 async def on_ready():
     config = await read_config()
-    #if config is not False do stuff, otherwise quit & tell user to run setup.py
+    # if config is not False do stuff, otherwise quit & tell user to run setup.py
     if config:
         if not config["channel_id"]:
             config = await read_config()
@@ -68,8 +68,8 @@ async def on_ready():
         exit()
 
 
-#@bot.event
-#async def on_command_error(ctx, error):
+# @bot.event
+# async def on_command_error(ctx, error):
 #    console.log(f"[red]Error[/red]: {str(error)}")
 
 
@@ -124,7 +124,8 @@ async def validate_category(category):
     else:
         return False
 
-#command to change the channel id. not too neccessary and will probably remove later
+
+# command to change the channel id. not too neccessary and will probably remove later
 @bot.slash_command()
 @commands.has_permissions(administrator=True)
 async def setchannelid(ctx, channel_id):
@@ -136,8 +137,10 @@ async def setchannelid(ctx, channel_id):
 
     await write_to_file(thing, "config.json")
 
-    embed = nextcord.Embed(title="Success",description=f"Successfully changed the Channel ID to '{channel_id}'",color=nextcord.Color.blurple())
+    embed = nextcord.Embed(title="Success", description=f"Successfully changed the Channel ID to '{channel_id}'",
+                           color=nextcord.Color.blurple())
     await ctx.send(embed=embed)
+
 
 @bot.slash_command()
 async def register(ctx):
@@ -241,8 +244,9 @@ async def leaderboard(ctx, category):
 
     await ctx.send(embed=embed)
 
+
 @bot.command()
-async def best_times(ctx):
+async def best_times(ctx, *, category):
     api = srcomapi.SpeedrunCom()
     game = api.search(srcomapi.datatypes.Game, {"name": "Celeste"})[0]
     print(game.categories)
@@ -267,12 +271,10 @@ async def best_times(ctx):
 
     embed = nextcord.Embed(title="Best Times", color=nextcord.Color.blurple())
     embed.add_field(
-        name=f"Best time for {game.categories[3]}",
+        name=f"Best time for {game.categories[cat_array_num].name}",
         value=f'Any%: {delta.replace("0000", "")}',
     )
     await ctx.send(embed=embed)
-
-
 
 
 # Phew, this is harder than I initially expected...
