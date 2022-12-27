@@ -12,7 +12,7 @@ def create_config():
     if not os.path.exists('data'):
         os.makedirs('data')
 
-    print("config.json not found. Creating it now")
+    print("config.json not found. Creating it now"
     with open('data/config.json','w') as f:
         f.write('{}')
 
