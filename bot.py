@@ -245,7 +245,22 @@ async def leaderboard(ctx, category):
 async def best_times(ctx):
     api = srcomapi.SpeedrunCom()
     game = api.search(srcomapi.datatypes.Game, {"name": "Celeste"})[0]
-    record = game.categories[3].records[0].runs[0]["run"]
+    print(game.categories)
+    count = -1
+    cat_array_num = False
+    for i in game.categories:
+        print(i)
+        count += 1
+        if i.name.lower() == category.lower():
+            cat_array_num = count
+            print(cat_array_num)
+            break
+
+    if not cat_array_num:
+        await ctx.send("Invalid Category. Valid Categories:" + str(game.categories))
+        return
+
+    record = game.categories[cat_array_num].records[0].runs[0]["run"]
     time = (record.times["primary_t"])
     delta = str(timedelta(seconds=time))
     print(delta)
