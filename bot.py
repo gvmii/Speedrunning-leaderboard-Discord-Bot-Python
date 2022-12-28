@@ -33,7 +33,8 @@ con = sqlite3.connect("data/database.db")
 cur = con.cursor()
 
 async def read_config():
-    # tries to open config.json, if it fails it will return false and prompt the user to run setup.py
+    # tries to open config.json, if it fails it will return false and prompt
+    # the user to run setup.py
     try:
         async with aiofiles.open(
                 "data/config.json", mode="r", encoding="utf8"
@@ -53,7 +54,8 @@ async def read_config():
 @bot.event
 async def on_ready():
     config = await read_config()
-    # if config is not False do stuff, otherwise quit & tell user to run setup.py
+    # if config is not False do stuff, otherwise quit & tell user to run
+    # setup.py
     if config:
         if not config["channel_id"]:
             config = await read_config()
@@ -130,7 +132,8 @@ async def validate_category(category):
         return False
 
 
-# command to change the channel id. not too neccessary and will probably remove later
+# command to change the channel id. not too neccessary and will probably
+# remove later
 @bot.slash_command()
 @commands.has_permissions(administrator=True)
 async def setchannelid(ctx, channel_id):
@@ -196,7 +199,7 @@ async def submit_time(ctx, category: str, time: str):
         ({user_id}, {formatted_time})
     """)
     con.commit()
-
+# IF ANY%, VALIDATECATEGORY NEEDS TO RETURN "anypercent" TO FIT THE DATABASE
     await ctx.send(
         f"Successfully submitted time of **{str(delta)}** for the "
         f"category **{category}** For the user {ctx.user} with ID "
@@ -285,19 +288,6 @@ async def best_times(ctx, *, category):
     embed = nextcord.Embed(title="Best Times", color=nextcord.Color.blurple())
     embed.add_field(name=game.categories[cat_array_num].name, value=f'Any%: {delta.replace("0000", "")}')
     await ctx.send(embed=embed)
-
-
-# Phew, this is harder than I initially expected...
-# @bot.command()
-# async def best_times(ctx):
-#     async with aiohttp.ClientSession() as session:
-#         async with session.get(
-#             "https://www.speedrun.com/api/v1/runs",
-#             params={"game": "Celeste", "category": "any%"},
-#         ) as r:
-#             print(await r.json())
-#             for i in r.json:
-#                 print(i)
 
 
 bot.run(os.getenv("TOKEN"))
