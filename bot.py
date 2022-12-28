@@ -169,8 +169,7 @@ async def favorite_song(ctx, song):
 
 @bot.slash_command()
 async def submit_time(ctx, category: str, time: str):
-    user_id = ctx.author.id
-    loaded_file = await read_dict("times.json")
+    user_id = ctx.user.id
     if await validate_category(category) is False:
         global VALID_CATEGORIES
         await ctx.send(
@@ -188,20 +187,17 @@ async def submit_time(ctx, category: str, time: str):
         )
         return
 
-    else:
-        if user_id in loaded_file:
-            loaded_file[user_id][category]["time"] = formatted_time
-            loaded_file[user_id][category]["state"] = "NEW"
+    cur.execute(f"""
+    INSERT OR REPLACE INTO {category} VALUES
+        ({user_id}, {formatted_time})
+    """)
+    con.commit()
 
-            await write_to_file(loaded_file, "times.json")
-            await ctx.send(
-                f"Successfully submitted time of **{str(delta)}** for the "
-                f"category **{category}** For the user {ctx.author} with ID "
-                f"{user_id} at {datetime.now()}"
-            )
-        else:
-            await ctx.send("registrate")
-            return
+    await ctx.send(
+        f"Successfully submitted time of **{str(delta)}** for the "
+        f"category **{category}** For the user {ctx.user} with ID "
+        f"{user_id} at {datetime.now()}"
+    )
 
 
 @bot.slash_command()
@@ -211,7 +207,7 @@ async def personal_best(
     user_id = ctx.author.id
     loaded_file = await read_dict("times.json")
 
-    user = user or ctx.author
+    user = user or ctx.user
 
     if user.id in loaded_file:
         pb = float(loaded_file[user_id].get(category))
