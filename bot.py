@@ -274,7 +274,7 @@ async def best_times(ctx, *, category):
             break
 
     if not cat_array_num:
-        await ctx.send("Invalid Category. Valid Categories:" + str(game.categories))
+        await ctx.send("Invalid Category. You can check the categories with /categories")
         return
 
     record = game.categories[cat_array_num].records[0].runs[0]["run"]
