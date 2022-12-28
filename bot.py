@@ -244,11 +244,24 @@ async def leaderboard(ctx, category):
 
     await ctx.send(embed=embed)
 
-
-@bot.command()
-async def best_times(ctx, *, category):
+async def get_game():
     api = srcomapi.SpeedrunCom()
     game = api.search(srcomapi.datatypes.Game, {"name": "Celeste"})[0]
+    return game
+
+@bot.slash_command()
+async def categories(ctx):
+    game = await get_game()
+    embed = nextcord.Embed(title="Categories", color=nextcord.Color.blurple())
+    for category in game.categories:
+        embed.add_field(name=category.name, value=category.weblink)
+    await ctx.send(embed=embed)
+
+
+
+@bot.slash_command()
+async def best_times(ctx, *, category):
+    game = await get_game()
     print(game.categories)
     count = -1
     cat_array_num = False
