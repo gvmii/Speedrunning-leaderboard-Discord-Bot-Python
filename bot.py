@@ -208,16 +208,15 @@ async def submit_time(ctx, category: str, time: str):
 async def personal_best(
         ctx, category: str = "Any%", user: nextcord.Member = None
 ):
-    user_id = ctx.user.id
-    loaded_file = await read_dict("times.json")
-
     user = user or ctx.user
 
-    if user.id in loaded_file:
-        pb = float(loaded_file[user_id].get(category))
-        await ctx.send(
-            f"{user.mention}'s {category} time is {str(timedelta(seconds=pb))}"
-        )
+    cur.execute(f"""
+    SELECT MIN(TIME) FROM {category} WHERE USER_ID = {user.id}
+
+    """)
+    time = cur.fetchall()[0][0]
+
+    await ctx.send(f"{user.mention}'s {category} time is {str(timedelta(seconds=time)).replace('0000', '') }")
 
 
 @bot.slash_command()
