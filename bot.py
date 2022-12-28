@@ -283,10 +283,7 @@ async def best_times(ctx, *, category):
     print(delta)
 
     embed = nextcord.Embed(title="Best Times", color=nextcord.Color.blurple())
-    embed.add_field(
-        name=f"Best time for {game.categories[cat_array_num].name}",
-        value=f'Any%: {delta.replace("0000", "")}',
-    )
+    embed.add_field(name=game.categories[cat_array_num].name, value=f'Any%: {delta.replace("0000", "")}')
     await ctx.send(embed=embed)
 
 
