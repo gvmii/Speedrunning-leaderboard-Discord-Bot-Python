@@ -27,6 +27,10 @@ bot = commands.Bot(
 console = console.Console()
 load_dotenv()
 
+# Inititialize connection to the SQLITE3 database
+
+con = sqlite3.connect("data/database.db")
+cur = con.cursor()
 
 async def read_config():
     # tries to open config.json, if it fails it will return false and prompt the user to run setup.py
@@ -145,7 +149,7 @@ async def setchannelid(ctx, channel_id):
 
 @bot.slash_command()
 async def register(ctx):
-    user_id = ctx.author.id
+    user_id = ctx.user.id
     loaded_file = await read_dict("times.json")
     writing_template = {
         user_id: {
@@ -160,7 +164,7 @@ async def register(ctx):
 @bot.slash_command()
 async def favorite_song(ctx, song):
     loaded_users = await read_list("user_songs.json")
-    user_id = ctx.author.id
+    user_id = ctx.user.id
     song_to_write = {user_id: song}
     loaded_users.update(song_to_write)
     print(loaded_users)
@@ -204,7 +208,7 @@ async def submit_time(ctx, category: str, time: str):
 async def personal_best(
         ctx, category: str = "Any%", user: nextcord.Member = None
 ):
-    user_id = ctx.author.id
+    user_id = ctx.user.id
     loaded_file = await read_dict("times.json")
 
     user = user or ctx.user

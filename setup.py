@@ -36,7 +36,8 @@ def create_db():
         print("database.db not found. Creating it now")
         con = sqlite3.connect('data/database.db')
         cur = con.cursor()
-        cur.execute('CREATE TABLE IF NOT EXISTS leaderboard(user_id, time, category)')
+        cur.execute('CREATE TABLE IF NOT EXISTS anypercent(user_id INTEGER, time FLOAT)')
+        cur.execute('CREATE TABLE IF NOT EXISTS arb(user_id INTEGER, time FLOAT)')
 
 def setup():
     install_requirements()
