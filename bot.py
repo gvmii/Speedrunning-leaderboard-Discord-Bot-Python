@@ -9,6 +9,7 @@ import sys
 from datetime import datetime, timedelta
 import aiofiles
 import nextcord
+import sqlite3
 import srcomapi, srcomapi.datatypes as dt
 from dotenv import load_dotenv
 from nextcord.ext import commands

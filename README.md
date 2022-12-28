@@ -29,7 +29,6 @@ Please first contribute to the project by fixing things tagged in the code with 
 - Make speedrun categories scalable
 - Move to another data file method (Database, or .csv)
 - Add a medals system, where you can give them to members for certain achievements
-- Get data from speedrun.com
 - Separate commands/utilities by cogs
 - Write unittests
 ### Style guidelines
