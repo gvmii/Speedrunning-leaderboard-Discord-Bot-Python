@@ -45,7 +45,9 @@ def create_db():
         cur.execute(
             "CREATE TABLE IF NOT EXISTS arb(user_id INTEGER, time FLOAT)"
         )
-
+        cur.execute(
+            "CREATE TABLE IF NOT EXISTS trueending(user_id INTEGER, time FLOAT)"
+        )
 
 def setup():
     install_requirements()

@@ -122,7 +122,7 @@ async def deltify_time(time):
     return delta
 
 
-VALID_CATEGORIES = ["ANY%", "ARB", "SL"]
+VALID_CATEGORIES = ["ANY%", "ARB", "TRUEENDING"]
 
 
 async def validate_category(category):
