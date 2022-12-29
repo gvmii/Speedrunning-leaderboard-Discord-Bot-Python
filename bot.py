@@ -16,7 +16,9 @@ from nextcord.ext import commands
 from rich import print, console
 
 intents = nextcord.Intents.default()
+
 intents.message_content = True
+intents.members = True
 
 bot = commands.Bot(
     command_prefix="!",
@@ -147,7 +149,7 @@ async def setchannelid(ctx, channel_id):
     await write_to_file(thing, "config.json")
 
     embed = nextcord.Embed(title="Success", description=f"Successfully changed the Channel ID to '{channel_id}'",
-                           color=nextcord.Color.blurple())
+                           color=nextcord.Color.from_rgb(255, 38, 96))
     await ctx.send(embed=embed)
 
 
@@ -196,8 +198,7 @@ async def submit_time(ctx, category: str, time: str):
             "Please write your time in the following format: H:M:S.ms"
         )
         return
-    
-    print("MEEP MOOP: " + category)
+
     cur.execute(f"""
     INSERT OR REPLACE INTO {category} VALUES
         ({user_id}, {formatted_time})
@@ -228,26 +229,49 @@ async def personal_best(
 
 @bot.slash_command()
 async def leaderboard(ctx, category):
-    loaded_file = await read_dict("times.json")
-    dict_to_sort = {}
 
-    for user_id, time in loaded_file.items():
-        print(time[category])
-        dict_to_sort.update({user_id: float(time[category]["time"])})
+        ## SAVING THIS ABSOLUTE FUCKING MONSTROSITY FOR PROSPERITY ##
 
-    sorted_obj = dict(sorted(dict_to_sort.items(), key=lambda i: i[1]))
+        # loaded_file = await read_dict("times.json")
+        # dict_to_sort = {}
 
-    embed = nextcord.Embed(title="Leaderboard")
-    print(sorted_obj.items())
-    number = 1
-    for userid, time in sorted_obj.items():
-        user = await bot.fetch_user(int(userid))
-        embed.add_field(
-            name=f"{number} - {user.name}",
-            value=str(timedelta(seconds=time)).replace("0000", ""),
-            inline=False,
-        )
+        # for user_id, time in loaded_file.items():
+        #     print(time[category])
+        #     dict_to_sort.update({user_id: float(time[category]["time"])})
+
+        # sorted_obj = dict(sorted(dict_to_sort.items(), key=lambda i: i[1]))
+
+        # embed = nextcord.Embed(title="Leaderboard")
+        # print(sorted_obj.items())
+        # number = 1
+        # for userid, time in sorted_obj.items():
+        #     user = await bot.fetch_user(int(userid))
+        #     embed.add_field(
+        #         name=f"{number} - {user.name}",
+        #         value=str(timedelta(seconds=time)).replace("0000", ""),
+        #         inline=False,
+        #     )
+        #     number += 1
+
+    if(category == 'any%'):
+        category = 'anypercent'
+    
+    cur.execute(f"""
+    SELECT user_id, time  FROM {category} ORDER BY time ASC
+    """)
+
+    leaderboard = cur.fetchall()
+    print(leaderboard)
+
+    embed = nextcord.Embed(title=f"Leaderboard for **{category}**", color=nextcord.Color.from_rgb(255, 38, 96))
+    number = 0
+    for user_id, time in leaderboard:
         number += 1
+        user = await bot.fetch_user(int(user_id))
+        embed.add_field(
+            name = f'{number} - {user}',
+            value = str(timedelta(seconds=time)).replace("0000", ""),
+            inline = False)
 
     await ctx.send(embed=embed)
 
@@ -259,7 +283,7 @@ async def get_game():
 @bot.slash_command()
 async def categories(ctx):
     game = await get_game()
-    embed = nextcord.Embed(title="Categories", color=nextcord.Color.blurple())
+    embed = nextcord.Embed(title="Categories", color=nextcord.Color.from_rgb(255, 38, 96))
     for category in game.categories:
         embed.add_field(name=category.name, value=category.weblink)
     await ctx.send(embed=embed)
@@ -289,7 +313,7 @@ async def best_times(ctx, *, category):
     delta = str(timedelta(seconds=time))
     print(delta)
 
-    embed = nextcord.Embed(title="Best Times", color=nextcord.Color.blurple())
+    embed = nextcord.Embed(title="Best Times", color=nextcord.Color.from_rgb(255, 38, 96))
     embed.add_field(name=game.categories[cat_array_num].name, value=f'Any%: {delta.replace("0000", "")}')
     await ctx.send(embed=embed)
 
