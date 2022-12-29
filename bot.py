@@ -166,17 +166,6 @@ async def register(ctx):
     loaded_file.update(writing_template)
     await write_to_file(loaded_file, "times.json")
 
-
-@bot.slash_command()
-async def favorite_song(ctx, song):
-    loaded_users = await read_list("user_songs.json")
-    user_id = ctx.user.id
-    song_to_write = {user_id: song}
-    loaded_users.update(song_to_write)
-    print(loaded_users)
-    await write_to_file(loaded_users, "user_songs.json")
-
-
 @bot.slash_command()
 async def submit_time(ctx, category: str, time: str):
     user_id = ctx.user.id
