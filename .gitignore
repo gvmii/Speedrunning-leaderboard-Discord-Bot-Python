@@ -2,3 +2,4 @@
 .env
 .fleet
 config.json
+database.db
