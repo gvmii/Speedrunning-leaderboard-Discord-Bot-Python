@@ -250,7 +250,6 @@ async def leaderboard(ctx, category):
     """)
 
     leaderboard = cur.fetchall()
-    print(leaderboard)
 
     embed = nextcord.Embed(title=f"Leaderboard for **{category}**", color=nextcord.Color.from_rgb(255, 38, 96))
     number = 0
