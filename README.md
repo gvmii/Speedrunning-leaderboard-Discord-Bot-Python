@@ -26,8 +26,6 @@ $ python ./bot.py
 ### TODO/WIP
 Please first contribute to the project by fixing things tagged in the code with "TODO:" or with "FIXME:"
 
-- Make speedrun categories scalable
-- Move to another data file method (Database, or .csv)
 - Add a medals system, where you can give them to members for certain achievements
 - Separate commands/utilities by cogs
 - Write unittests
