@@ -127,6 +127,7 @@ async def validate_category(category):
     global VALID_CATEGORIES
     c = category.upper()
     if c in VALID_CATEGORIES:
+
         return True
     else:
         return False
@@ -184,6 +185,8 @@ async def submit_time(ctx, category: str, time: str):
             + str(VALID_CATEGORIES)
         )
         return
+    if category == 'any%':
+        category = 'anypercent'
     # TODO: Fix this jank thing
     delta = await deltify_time(time)
     try:
@@ -193,13 +196,14 @@ async def submit_time(ctx, category: str, time: str):
             "Please write your time in the following format: H:M:S.ms"
         )
         return
-
+    
+    print("MEEP MOOP: " + category)
     cur.execute(f"""
     INSERT OR REPLACE INTO {category} VALUES
         ({user_id}, {formatted_time})
     """)
     con.commit()
-# IF ANY%, VALIDATECATEGORY NEEDS TO RETURN "anypercent" TO FIT THE DATABASE
+
     await ctx.send(
         f"Successfully submitted time of **{str(delta)}** for the "
         f"category **{category}** For the user {ctx.user} with ID "
